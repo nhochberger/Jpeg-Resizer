@@ -7,6 +7,7 @@ import hochberger.utilities.gui.input.ValidatingTextField;
 import hochberger.utilities.gui.input.validator.InputValidator;
 import hochberger.utilities.gui.lookandfeel.SetLookAndFeelTo;
 import hochberger.utilities.images.loader.ImageLoader;
+import hochberger.utilities.threading.ThreadRunner;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -34,10 +35,12 @@ import controller.listeners.StartResizingListener;
 
 public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelectionListener, ProgressListener {
 
+	private static final String DEFAULT_IMAGE_SIZE = "800";
 	private final List<FileSelectionListener> fileSelectionListeners;
 	private final List<StartResizingListener> startResizingListeners;
 	private JFileChooser fileChooser;
 	private JProgressBar progressBar;
+	private ValidatingTextField sizeTextField;
 
 	public ImageResizerMainFrame() {
 		super();
@@ -82,20 +85,19 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 	private JComponent createSettingsPanel() {
 		JPanel result = new JPanel(new MigLayout("", "[50]5[]"));
 		result.setOpaque(false);
-		JTextField textField = createSizeTextField();
-		textField.setToolTipText("Gewünschte Anzahl Pixel der größeren Seite");
-		result.add(textField, "growx");
+		this.sizeTextField = createSizeTextField();
+		this.sizeTextField.setToolTipText("Gewünschte Anzahl Pixel der größeren Seite");
+		result.add(this.sizeTextField, "growx");
 		JLabel label = new JLabel("Pixel");
 		label.setForeground(Color.LIGHT_GRAY);
 		result.add(label);
 		return result;
 	}
 
-	private JTextField createSizeTextField() {
-		final ValidatingTextField result = new ValidatingTextField("800");
+	private ValidatingTextField createSizeTextField() {
+		final ValidatingTextField result = new ValidatingTextField(DEFAULT_IMAGE_SIZE);
 		result.setHorizontalAlignment(JTextField.RIGHT);
 		result.addValidator(new InputValidator<String>() {
-
 			@Override
 			public boolean isValid(String input) {
 				try {
@@ -123,10 +125,11 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 	private JComponent createStartButton() {
 		JButton result = new JButton(ImageLoader.loadIcon("graphics/accept.png"));
 		result.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				notifyStartResizingListeners();
+				if (ImageResizerMainFrame.this.sizeTextField.validateInput()) {
+					notifyStartResizingListeners();
+				}
 			}
 		});
 		return result;
@@ -148,7 +151,7 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 
 	private void notifyFileSelectionListeners() {
 		EDT.always();
-		new Thread(new Runnable() {
+		ThreadRunner.startThread(new Runnable() {
 			@Override
 			public void run() {
 				EDT.never();
@@ -156,20 +159,24 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 					listener.filesSelected(ImageResizerMainFrame.this.fileChooser.getSelectedFiles());
 				}
 			}
-		}).start();
+		});
 	}
 
 	private void notifyStartResizingListeners() {
 		EDT.always();
-		new Thread(new Runnable() {
+		ThreadRunner.startThread(new Runnable() {
 			@Override
 			public void run() {
 				EDT.never();
 				for (StartResizingListener listener : ImageResizerMainFrame.this.startResizingListeners) {
-					listener.startResizing();
+					listener.starResizing(getDesiredSize());
 				}
 			}
-		}).start();
+		}, "ResizeImagesThread");
+	}
+
+	private int getDesiredSize() {
+		return Integer.parseInt(this.sizeTextField.getText());
 	}
 
 	@Override
@@ -186,7 +193,6 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 	@Override
 	public void progress() {
 		performBlockingOnEDT(new Runnable() {
-
 			@Override
 			public void run() {
 				ImageResizerMainFrame.this.progressBar.setValue(ImageResizerMainFrame.this.progressBar.getValue() + 1);

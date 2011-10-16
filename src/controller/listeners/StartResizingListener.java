@@ -2,5 +2,5 @@ package controller.listeners;
 
 public interface StartResizingListener {
 
-	public void startResizing();
+	public void starResizing(int desiredSize);
 }
