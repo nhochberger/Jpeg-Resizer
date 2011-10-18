@@ -1,5 +1,6 @@
 package gui;
 
+import edt.EDT;
 import gui.listeners.ProgressListener;
 import hochberger.utilities.gui.EDTSafeFrame;
 import hochberger.utilities.gui.StretchingBackgroundedPanel;
@@ -27,9 +28,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
-
-import com.schneide.framework.gui.swing.EDT;
-
 import controller.listeners.FileSelectionListener;
 import controller.listeners.StartResizingListener;
 
