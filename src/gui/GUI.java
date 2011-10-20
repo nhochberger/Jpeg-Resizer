@@ -11,6 +11,7 @@
 package gui;
 
 import gui.listeners.ProgressListener;
+import hochberger.utilities.application.ApplicationProperties;
 import controller.listeners.FileSelectionListener;
 import controller.listeners.StartResizingListener;
 
@@ -18,9 +19,9 @@ public class GUI implements ProgressListener {
 
 	private final ImageResizerMainFrame frame;
 
-	public GUI() {
+	public GUI(ApplicationProperties applicationProperties) {
 		super();
-		this.frame = new ImageResizerMainFrame();
+		this.frame = new ImageResizerMainFrame(applicationProperties.title());
 	}
 
 	public void activateGUI() {

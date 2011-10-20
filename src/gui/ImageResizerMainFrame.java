@@ -49,9 +49,11 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 	private JFileChooser fileChooser;
 	private JProgressBar progressBar;
 	private ValidatingTextField sizeTextField;
+	private final String title;
 
-	public ImageResizerMainFrame() {
-		super();
+	public ImageResizerMainFrame(String title) {
+		super(title);
+		this.title = title;
 		this.fileSelectionListeners = new LinkedList<FileSelectionListener>();
 		this.startResizingListeners = new LinkedList<StartResizingListener>();
 		addFileSelectionListener(this);
@@ -63,7 +65,6 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 		frame().setContentPane(new StretchingBackgroundedPanel(ImageLoader.loadImage("graphics/bkg.png")));
 		notResizable();
 		exitOnClose();
-		setTitle("JPEG Resizer");
 		useLayoutManager(new MigLayout("", "10[180]10[180]10[right]10", "10[]10[]10[nogrid]10"));
 		this.fileChooser = new JpegFileChooser();
 		add(new SequenceNumberPanel(1, "Dateien wählen"));
