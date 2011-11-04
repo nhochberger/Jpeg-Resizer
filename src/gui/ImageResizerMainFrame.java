@@ -49,11 +49,9 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 	private JFileChooser fileChooser;
 	private JProgressBar progressBar;
 	private ValidatingTextField sizeTextField;
-	private final String title;
 
 	public ImageResizerMainFrame(String title) {
 		super(title);
-		this.title = title;
 		this.fileSelectionListeners = new LinkedList<FileSelectionListener>();
 		this.startResizingListeners = new LinkedList<StartResizingListener>();
 		addFileSelectionListener(this);
