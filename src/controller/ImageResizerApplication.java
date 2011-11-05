@@ -33,6 +33,7 @@ public class ImageResizerApplication {
 			gui.addFileSelectionListener(resizer);
 			gui.addStartResizingListener(resizer);
 			resizer.addProgressListener(gui);
+			resizer.addResizingFinishedListener(gui);
 		} catch (Exception e) {
 			LOGGER.fatal("Error while starting application. Shutting down.", e);
 		}

@@ -11,20 +11,19 @@
 package gui;
 
 import edt.EDT;
-import gui.listeners.ProgressListener;
 import hochberger.utilities.gui.EDTSafeFrame;
 import hochberger.utilities.gui.StretchingBackgroundedPanel;
+import hochberger.utilities.gui.input.SelfHighlightningValidatingTextField;
 import hochberger.utilities.gui.input.ValidatingTextField;
-import hochberger.utilities.gui.input.validator.InputValidator;
+import hochberger.utilities.gui.input.validator.IntegerStringInputValidator;
 import hochberger.utilities.gui.lookandfeel.SetLookAndFeelTo;
 import hochberger.utilities.images.loader.ImageLoader;
 import hochberger.utilities.threading.ThreadRunner;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,13 +38,16 @@ import javax.swing.JTextField;
 
 import net.miginfocom.swing.MigLayout;
 import controller.listeners.FileSelectionListener;
+import controller.listeners.ProgressListener;
+import controller.listeners.ResizingFinishedListener;
 import controller.listeners.StartResizingListener;
 
-public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelectionListener, ProgressListener {
+public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelectionListener, ProgressListener, StartResizingListener, ResizingFinishedListener {
 
 	private static final String DEFAULT_IMAGE_SIZE = "800";
 	private final List<FileSelectionListener> fileSelectionListeners;
 	private final List<StartResizingListener> startResizingListeners;
+	private final List<Component> stateDependentComponents;
 	private JFileChooser fileChooser;
 	private JProgressBar progressBar;
 	private ValidatingTextField sizeTextField;
@@ -54,7 +56,9 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 		super(title);
 		this.fileSelectionListeners = new LinkedList<FileSelectionListener>();
 		this.startResizingListeners = new LinkedList<StartResizingListener>();
+		this.stateDependentComponents = new LinkedList<Component>();
 		addFileSelectionListener(this);
+		addStartResizingListener(this);
 	}
 
 	@Override
@@ -68,9 +72,15 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 		add(new SequenceNumberPanel(1, "Dateien wählen"));
 		add(new SequenceNumberPanel(2, "Größe wählen"));
 		add(new SequenceNumberPanel(3, "Starten"), "wrap");
-		add(createFileChooserButton());
-		add(createSettingsPanel());
-		add(createStartButton(), "wrap");
+		JButton fileChooserButton = createFileChooserButton();
+		JComponent settingsPanel = createSettingsPanel();
+		JComponent startButton = createStartButton();
+		this.stateDependentComponents.add(fileChooserButton);
+		this.stateDependentComponents.add(settingsPanel);
+		this.stateDependentComponents.add(startButton);
+		add(fileChooserButton);
+		add(settingsPanel);
+		add(startButton, "wrap");
 		add(createProgressBar(), "growx");
 		frame().pack();
 		frame().setLocationRelativeTo(null);
@@ -102,30 +112,9 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 	}
 
 	private ValidatingTextField createSizeTextField() {
-		final ValidatingTextField result = new ValidatingTextField(DEFAULT_IMAGE_SIZE);
+		final ValidatingTextField result = new SelfHighlightningValidatingTextField(DEFAULT_IMAGE_SIZE);
 		result.setHorizontalAlignment(JTextField.RIGHT);
-		result.addValidator(new InputValidator<String>() {
-			@Override
-			public boolean isValid(String input) {
-				try {
-					Integer.parseInt(input);
-					return true;
-				} catch (NumberFormatException e) {
-					return false;
-				}
-			}
-		});
-		result.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				super.keyTyped(e);
-				if (result.validateInput()) {
-					result.setForeground(Color.BLACK);
-					return;
-				}
-				result.setForeground(Color.RED);
-			}
-		});
+		result.addValidator(new IntegerStringInputValidator());
 		return result;
 	}
 
@@ -186,6 +175,18 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 		return Integer.parseInt(this.sizeTextField.getText());
 	}
 
+	private void disableStateDependentComponents() {
+		for (Component component : this.stateDependentComponents) {
+			component.setEnabled(false);
+		}
+	}
+
+	private void enableStateDependentComponents() {
+		for (Component component : this.stateDependentComponents) {
+			component.setEnabled(true);
+		}
+	}
+
 	@Override
 	public void filesSelected(final File... files) {
 		performBlockingOnEDT(new Runnable() {
@@ -205,5 +206,15 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 				ImageResizerMainFrame.this.progressBar.setValue(ImageResizerMainFrame.this.progressBar.getValue() + 1);
 			}
 		});
+	}
+
+	@Override
+	public void starResizing(int desiredSize) {
+		disableStateDependentComponents();
+	}
+
+	@Override
+	public void resizingFinished() {
+		enableStateDependentComponents();
 	}
 }

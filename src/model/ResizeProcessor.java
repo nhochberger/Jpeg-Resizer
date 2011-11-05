@@ -10,8 +10,6 @@
  ******************************************************************************/
 package model;
 
-import gui.listeners.ProgressListener;
-
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +23,8 @@ import com.thebuzzmedia.imgscalr.Scalr.Method;
 
 import controller.ImageResizerApplication;
 import controller.listeners.FileSelectionListener;
+import controller.listeners.ProgressListener;
+import controller.listeners.ResizingFinishedListener;
 import controller.listeners.StartResizingListener;
 
 public class ResizeProcessor implements StartResizingListener, FileSelectionListener {
@@ -32,11 +32,13 @@ public class ResizeProcessor implements StartResizingListener, FileSelectionList
 	private static final String JPEG_FORMAT = "JPG";
 	private static final String SUBFOLDER_NAME = "/resized/";
 	private final List<ProgressListener> progressListeners;
+	private final List<ResizingFinishedListener> resizingFinishedListeners;
 	private File[] files = {};
 
 	public ResizeProcessor() {
 		super();
 		this.progressListeners = new LinkedList<ProgressListener>();
+		this.resizingFinishedListeners = new LinkedList<ResizingFinishedListener>();
 	}
 
 	@Override
@@ -47,6 +49,7 @@ public class ResizeProcessor implements StartResizingListener, FileSelectionList
 			ImageResizerApplication.LOGGER.debug("Resizing ends");
 			notifyProgressListeners();
 		}
+		notifyResizingFinishedListeners();
 	}
 
 	private void resize(File file, int desiredSize) {
@@ -91,10 +94,21 @@ public class ResizeProcessor implements StartResizingListener, FileSelectionList
 		this.progressListeners.add(listener);
 	}
 
+	public void addResizingFinishedListener(ResizingFinishedListener listener) {
+		this.resizingFinishedListeners.add(listener);
+	}
+
 	private void notifyProgressListeners() {
 		ImageResizerApplication.LOGGER.debug("Notifying progress listeners.");
 		for (ProgressListener listener : this.progressListeners) {
 			listener.progress();
+		}
+	}
+
+	private void notifyResizingFinishedListeners() {
+		ImageResizerApplication.LOGGER.debug("Notifying finished listeners.");
+		for (ResizingFinishedListener listener : this.resizingFinishedListeners) {
+			listener.resizingFinished();
 		}
 	}
 }

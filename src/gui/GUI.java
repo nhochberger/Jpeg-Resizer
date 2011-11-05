@@ -10,12 +10,13 @@
  ******************************************************************************/
 package gui;
 
-import gui.listeners.ProgressListener;
 import hochberger.utilities.application.ApplicationProperties;
 import controller.listeners.FileSelectionListener;
+import controller.listeners.ProgressListener;
+import controller.listeners.ResizingFinishedListener;
 import controller.listeners.StartResizingListener;
 
-public class GUI implements ProgressListener {
+public class GUI implements ProgressListener, ResizingFinishedListener {
 
 	private final ImageResizerMainFrame frame;
 
@@ -39,5 +40,10 @@ public class GUI implements ProgressListener {
 	@Override
 	public void progress() {
 		this.frame.progress();
+	}
+
+	@Override
+	public void resizingFinished() {
+		this.frame.resizingFinished();
 	}
 }
