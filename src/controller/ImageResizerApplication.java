@@ -20,6 +20,8 @@ import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
 
+import controller.feedback.AcousticFinishedSignalPlayer;
+
 public class ImageResizerApplication {
 
 	public static Logger LOGGER = setUpLoggingServices();
@@ -34,6 +36,7 @@ public class ImageResizerApplication {
 			gui.addStartResizingListener(resizer);
 			resizer.addProgressListener(gui);
 			resizer.addResizingFinishedListener(gui);
+			resizer.addResizingFinishedListener(new AcousticFinishedSignalPlayer());
 		} catch (Exception e) {
 			LOGGER.fatal("Error while starting application. Shutting down.", e);
 		}
