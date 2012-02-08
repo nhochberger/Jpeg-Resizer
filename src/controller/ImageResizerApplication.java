@@ -12,21 +12,14 @@ package controller;
 
 import gui.GUI;
 import hochberger.utilities.application.ApplicationProperties;
+import hochberger.utilities.application.BasicLoggedApplication;
 import model.ResizeProcessor;
-
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Layout;
-import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
-
 import controller.feedback.AcousticFinishedSignalPlayer;
 
-public class ImageResizerApplication {
-
-	public static Logger LOGGER = setUpLoggingServices();
+public class ImageResizerApplication extends BasicLoggedApplication {
 
 	public static void main(String[] args) {
+		setUpLoggingServices(ImageResizerApplication.class);
 		try {
 			ApplicationProperties applicationProperties = new ApplicationProperties();
 			GUI gui = new GUI(applicationProperties);
@@ -38,22 +31,7 @@ public class ImageResizerApplication {
 			resizer.addResizingFinishedListener(gui);
 			resizer.addResizingFinishedListener(new AcousticFinishedSignalPlayer());
 		} catch (Exception e) {
-			LOGGER.fatal("Error while starting application. Shutting down.", e);
+			getLogger().fatal("Error while starting application. Shutting down.", e);
 		}
-	}
-
-	private static Logger setUpLoggingServices() {
-		try {
-			Logger logger = Logger.getLogger(ImageResizerApplication.class);
-			Layout layout = new SimpleLayout();
-			logger.addAppender(new ConsoleAppender(layout));
-			logger.addAppender(new FileAppender(layout, "logs/main.log"));
-			return logger;
-		} catch (Exception e) {
-			System.err.println("Error while setting up logging service. Application will be shut down.");
-			e.printStackTrace();
-			System.exit(0);
-		}
-		return null;
 	}
 }
