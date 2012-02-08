@@ -34,4 +34,12 @@ public class ImageResizerApplication extends BasicLoggedApplication {
 			getLogger().fatal("Error while starting application. Shutting down.", e);
 		}
 	}
+
+	@Override
+	public void start() {
+	}
+
+	@Override
+	public void stop() {
+	}
 }
