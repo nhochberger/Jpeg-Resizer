@@ -35,6 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import net.miginfocom.swing.MigLayout;
 import controller.listeners.FileSelectionListener;
@@ -113,7 +114,7 @@ public class ImageResizerMainFrame extends EDTSafeFrame implements FileSelection
 
 	private ValidatingTextField createSizeTextField() {
 		final ValidatingTextField result = new SelfHighlightningValidatingTextField(DEFAULT_IMAGE_SIZE);
-		result.setHorizontalAlignment(JTextField.RIGHT);
+		result.setHorizontalAlignment(SwingConstants.RIGHT);
 		result.addValidator(new IntegerStringInputValidator());
 		return result;
 	}

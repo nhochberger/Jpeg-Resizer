@@ -10,6 +10,8 @@
  ******************************************************************************/
 package model;
 
+import hochberger.utilities.application.BasicLoggedApplication;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -44,9 +46,9 @@ public class ResizeProcessor implements StartResizingListener, FileSelectionList
 	@Override
 	public void starResizing(int desiredSize) {
 		for (File file : this.files) {
-			ImageResizerApplication.getLogger().debug("Resizing begins");
+			BasicLoggedApplication.getLogger().debug("Resizing begins");
 			resize(file, desiredSize);
-			ImageResizerApplication.getLogger().debug("Resizing ends");
+			BasicLoggedApplication.getLogger().debug("Resizing ends");
 			notifyProgressListeners();
 		}
 		notifyResizingFinishedListeners();
@@ -60,7 +62,7 @@ public class ResizeProcessor implements StartResizingListener, FileSelectionList
 			File destinationFile = determineDestinationFileFor(file);
 			writeImageTo(resizedImage, destinationFile);
 		} catch (IOException e) {
-			ImageResizerApplication.getLogger().error("Error while resizing image.", e);
+			BasicLoggedApplication.getLogger().error("Error while resizing image.", e);
 		}
 	}
 
@@ -99,14 +101,14 @@ public class ResizeProcessor implements StartResizingListener, FileSelectionList
 	}
 
 	private void notifyProgressListeners() {
-		ImageResizerApplication.getLogger().debug("Notifying progress listeners.");
+		BasicLoggedApplication.getLogger().debug("Notifying progress listeners.");
 		for (ProgressListener listener : this.progressListeners) {
 			listener.progress();
 		}
 	}
 
 	private void notifyResizingFinishedListeners() {
-		ImageResizerApplication.getLogger().debug("Notifying finished listeners.");
+		BasicLoggedApplication.getLogger().debug("Notifying finished listeners.");
 		for (ResizingFinishedListener listener : this.resizingFinishedListeners) {
 			listener.resizingFinished();
 		}
